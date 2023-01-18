@@ -6,7 +6,11 @@ var startscreen = document.getElementById('start-screen');
 var questiontitle = document.getElementById('question-title');
 var choices = document.getElementById('choices');
 var chosen = document.querySelector(".choice")
-var nextq = 0;
+var finalscore = document.getElementById("final-score");
+var userInitials = document.getElementById("initials");
+var submitButton = document.getElementById("submit");
+
+var score=0;
 
 
 function quiz(){
@@ -21,7 +25,7 @@ function quiz(){
   }
 
 }
-var timeLeft = 30;
+var timeLeft = 120;
 function countdown() {
 
     
@@ -35,21 +39,21 @@ function countdown() {
         timerEl.textContent = timeLeft;
         endgame();
         
-      } else if( nextq === "4"){
-        endgame();
-      }
+      } 
     }, 1000);
   }
 function showanswers(){
   choices.innerHTML = "";
   
-
+  if(nextq === question1.length){
+    endgame();
+  }
   
   
   for (var i = 0; i < 4; i++) {
     
     var allanswers = answers1[nextq][i][0];
-
+    
     
     var li = document.createElement("button"); // <li></li>
     li.setAttribute("type","button");
@@ -61,11 +65,15 @@ function showanswers(){
 
 }
 
+var nextq = 0;
 function endgame(){
   var state=endscreen.getAttribute("class");
+  score=timeLeft;
+  finalscore.innerHTML=score;
+  
   if(state==="hide"){
     
-    questiontitle.textContent=question1[nextq];
+    
     endscreen.setAttribute("class","show");
     startscreen.setAttribute("class","hide");
     questions.setAttribute("class","hide");
@@ -74,6 +82,42 @@ function endgame(){
 
 
 }
+
+var data=[];
+
+
+
+submitButton.addEventListener("click", function(event) {
+  event.preventDefault();
+  
+  var initials = document.querySelector("#initials").value;
+  
+
+  if (initials === "") {
+    alert( "Initials cannot be blank");
+  }else if((JSON.parse(localStorage.getItem("arr")))===null){
+    localStorage.setItem("initials", initials);
+    localStorage.setItem("score", timeLeft);
+    localStorage.setItem("arr", JSON.stringify(data));
+    data=JSON.parse(localStorage.getItem("arr"));
+    data.push(initials+" - "+score)
+    localStorage.setItem("arr", JSON.stringify(data));
+   data=JSON.parse(localStorage.getItem("arr"));
+   alert( "Score saved successfully");
+  }else {
+    
+    
+    localStorage.setItem("initials", initials);
+    localStorage.setItem("score", timeLeft);
+    data=JSON.parse(localStorage.getItem("arr"));
+    data.push(initials+" - "+score)
+    localStorage.setItem("arr", JSON.stringify(data));
+    data=JSON.parse(localStorage.getItem("arr"));
+    alert( "Score saved successfully");
+    
+    
+  }
+});
 
 
 
@@ -85,18 +129,23 @@ questions.addEventListener("click", function(event){
   if(element.matches(".choice")){
     var state2 = element.getAttribute("data-state");
     
-    if (state2 === "false") {
+    if (state2 === "false" && nextq<question1.length-1) {
       timeLeft=timeLeft-10;
       nextq++;
       showanswers();
       questiontitle.textContent=question1[nextq];
       
    
-    }else if(state2==="true"){
+    }else if(state2==="true" && nextq<question1.length-1){
       nextq++;
       showanswers();
       questiontitle.textContent=question1[nextq];
 
+    }else if(state2==="false" && nextq==question1.length-1){
+      timeLeft=timeLeft-10;
+      endgame();
+    }else{
+      endgame();
     }
 
 
